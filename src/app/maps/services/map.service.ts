@@ -1,11 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { LngLatBounds, LngLatLike, Map, Marker, Popup, SourceSpecification } from 'mapbox-gl';
+// import { GeoJSONSourceRaw, LngLatBounds, LngLatLike, Map, Marker, Popup, mapboxgl } from 'mapbox-gl';
 import { Feature } from '../interfaces/response-suggestions.interfaces';
 import { MarkerMap } from '../interfaces/marker';
 import { DirectionsApiClient } from '../api';
 import { DirectionsResponse, Route } from '../interfaces/direction.interfaces';
 import { Observable } from 'rxjs';
-import { AnySourceData } from 'mapbox-gl';
+import { GeoJSONSourceRaw, LngLatLike, Map, Marker } from 'mapbox-gl';
+
+
 
 
 @Injectable({
@@ -36,7 +38,7 @@ export class MapService {
 
   setMarket( marker: MarkerMap ){
     if( !marker.map ) throw new Error("No se encontro el mapa");
-    const  mark =  new Marker({color: marker.color}).setLngLat(marker.lngLat).addTo(marker.map);
+    const  mark =  new mapboxgl.Marker({color: marker.color}).setLngLat(marker.lngLat).addTo(marker.map);
     if( marker.popUp ) mark.setPopup(marker.popUp);
   }
 
@@ -46,18 +48,18 @@ export class MapService {
     const newMarkers = [];
     for( const place of places){
       const  {longitude , latitude}  = place.properties.coordinates;
-      const popUp = new Popup().setHTML(`
+      const popUp = new mapboxgl.Popup().setHTML(`
         <h6>Aqui Estoy</h6>
         <span>Estoy en este lugar del mundo</span>
       `);
-      const newMarker = new Marker().setLngLat([longitude, latitude]).setPopup(popUp).addTo(this.map);
+      const newMarker = new mapboxgl.Marker().setLngLat([longitude, latitude]).setPopup(popUp).addTo(this.map);
       newMarkers.push(newMarker);
     }
     this.markers = newMarkers;
 
     if(places.length == 0 ) return;
 
-    const bounds = new LngLatBounds();
+    const bounds = new mapboxgl.LngLatBounds();
     newMarkers.forEach( marker => bounds.extend( marker.getLngLat() ) );
     this.map.fitBounds(bounds, {
       padding: 200
@@ -72,14 +74,14 @@ export class MapService {
     console.log(`km: ${ route.distance / 1000 }, duration: ${ route.duration / 60 }`);
     if( !this.map ) throw new Error('Mapa no inicializado');
     const coords = route.geometry.coordinates
-    const bound = new LngLatBounds();
+    const bound = new mapboxgl.LngLatBounds();
     route.geometry.coordinates.forEach( coor => bound.extend(coor as LngLatLike) );
     this.map.fitBounds(bound, {
       padding: 200
     })
 
     //PolyLine
-    const sourceData: SourceSpecification = {
+    const sourceData: GeoJSONSourceRaw = {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',

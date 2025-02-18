@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { MapService, PlacesService } from '../../services';
-import { LngLat, Map, Popup } from 'mapbox-gl';
 import { MarkerMap } from '../../interfaces/marker';
+
 
 @Component({
   selector: 'app-map-view',
@@ -17,7 +17,10 @@ export class MapViewComponent implements AfterViewInit {
   private placesServices = inject(PlacesService);
   private mapService = inject(MapService);
 
+
   ngAfterViewInit(): void {
+    const { Map, Popup } = mapboxgl;
+
     if( !this.placesServices.userLocation ) throw new Error('Error en la localizacion del usuario');
     const map = new Map({
       container: this.mapDivElement.nativeElement, // container ID
@@ -36,7 +39,7 @@ export class MapViewComponent implements AfterViewInit {
 
     const marker: MarkerMap = {
       color: 'red',
-      lngLat: LngLat.convert(this.placesServices.userLocation),
+      lngLat: mapboxgl.LngLat.convert(this.placesServices.userLocation),
       popUp: popup,
       map: map
     }
